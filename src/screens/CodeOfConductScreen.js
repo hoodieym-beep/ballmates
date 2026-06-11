@@ -1,35 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { Text, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useState } from 'react';
+import { Text, ScrollView, StyleSheet, TouchableOpacity, View, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, typography, shadows } from '../constants/theme';
-
-const COC_ACCEPTANCE_KEY = 'codeOfConductAccepted';
+import { useAuth } from '../context/AuthContext';
+import { api } from '../services/api';
 
 export default function CodeOfConductScreen() {
-  const [accepted, setAccepted] = useState(false);
-
-  useEffect(() => {
-    checkAcceptance();
-  }, []);
-
-  const checkAcceptance = async () => {
-    try {
-      const stored = await AsyncStorage.getItem(COC_ACCEPTANCE_KEY);
-      if (stored === 'true') {
-        setAccepted(true);
-      }
-    } catch (e) {
-      console.error('Failed to check CoC acceptance:', e);
-    }
-  };
+  const { user, refreshUser } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const accepted = !!user?.codeOfConductAcceptedAt;
 
   const handleAccept = async () => {
+    setLoading(true);
     try {
-      await AsyncStorage.setItem(COC_ACCEPTANCE_KEY, 'true');
-      setAccepted(true);
+      await api('/api/users/accept-code-of-conduct', { method: 'POST' });
+      await refreshUser();
     } catch (e) {
-      console.error('Failed to save CoC acceptance:', e);
+      Alert.alert('Error', e.message || 'Failed to accept code of conduct');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -42,7 +31,7 @@ export default function CodeOfConductScreen() {
       <TouchableOpacity
         style={[styles.button, accepted && styles.buttonAccepted]}
         onPress={handleAccept}
-        disabled={accepted}
+        disabled={accepted || loading}
         activeOpacity={accepted ? 1 : 0.8}
       >
         <View style={styles.buttonContent}>
@@ -52,7 +41,7 @@ export default function CodeOfConductScreen() {
               <Text style={styles.buttonText}>Code of conduct accepted</Text>
             </>
           ) : (
-            <Text style={styles.buttonText}>Accept code of conduct</Text>
+            <Text style={styles.buttonText}>{loading ? 'Accepting...' : 'Accept code of conduct'}</Text>
           )}
         </View>
       </TouchableOpacity>
