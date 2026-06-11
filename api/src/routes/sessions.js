@@ -156,6 +156,7 @@ router.post('/:id/join', auth, async (req, res, next) => {
     const s = await Session.findById(req.params.id);
     if (!s) return res.status(404).json({ error: 'Session not found' });
     if (s.status !== 'active') return res.status(400).json({ error: 'Session is not active' });
+    if (!req.user.codeOfConductAcceptedAt) return res.status(403).json({ error: 'You must accept the code of conduct before joining sessions' });
     const already = s.participants.some((p) => p.userId.toString() === req.user._id.toString());
     if (already) return res.status(400).json({ error: 'Already joined' });
     if (s.participants.length >= s.maxPlayers) return res.status(400).json({ error: 'Session is full' });
