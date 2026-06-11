@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Text, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, typography } from '../constants/theme';
+import { colors, spacing, typography, shadows } from '../constants/theme';
 
 const COC_ACCEPTANCE_KEY = 'codeOfConductAccepted';
 
@@ -43,14 +43,25 @@ export default function CodeOfConductScreen() {
         style={[styles.button, accepted && styles.buttonAccepted]}
         onPress={handleAccept}
         disabled={accepted}
+        activeOpacity={accepted ? 1 : 0.8}
       >
         <View style={styles.buttonContent}>
-          {accepted && <Ionicons name="checkmark-circle" size={20} color={colors.success} style={styles.icon} />}
-          <Text style={[styles.buttonText, accepted && styles.buttonTextAccepted]}>
-            {accepted ? 'Code of conduct accepted' : 'Accept code of conduct'}
-          </Text>
+          {accepted ? (
+            <>
+              <Ionicons name="checkmark-circle" size={24} color="white" style={styles.icon} />
+              <Text style={styles.buttonText}>Code of conduct accepted</Text>
+            </>
+          ) : (
+            <Text style={styles.buttonText}>Accept code of conduct</Text>
+          )}
         </View>
       </TouchableOpacity>
+
+      {accepted && (
+        <Text style={styles.acceptedNote}>
+          You can join sessions now.
+        </Text>
+      )}
     </ScrollView>
   );
 }
@@ -62,19 +73,21 @@ const styles = StyleSheet.create({
   para: { ...typography.body, color: colors.textSecondary, lineHeight: 24, marginBottom: spacing.lg },
   button: {
     marginTop: spacing.xl,
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.lg,
     paddingHorizontal: spacing.lg,
     backgroundColor: colors.primary,
-    borderRadius: 8,
+    borderRadius: 12,
     alignItems: 'center',
+    justifyContent: 'center',
+    ...shadows.md,
   },
   buttonAccepted: {
     backgroundColor: colors.success,
-    opacity: 0.6,
   },
   buttonContent: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   icon: {
     marginRight: spacing.sm,
@@ -84,7 +97,11 @@ const styles = StyleSheet.create({
     color: 'white',
     textAlign: 'center',
   },
-  buttonTextAccepted: {
-    color: 'white',
+  acceptedNote: {
+    marginTop: spacing.lg,
+    ...typography.bodySmall,
+    color: colors.success,
+    textAlign: 'center',
+    fontWeight: '500',
   },
 });
