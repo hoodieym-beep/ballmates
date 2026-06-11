@@ -31,6 +31,15 @@ router.patch('/me', [
   }
 });
 
+router.post('/accept-code-of-conduct', async (req, res, next) => {
+  try {
+    const user = await User.findByIdAndUpdate(req.user._id, { codeOfConductAcceptedAt: new Date() }, { new: true }).select('-passwordHash');
+    res.json(user);
+  } catch (e) {
+    next(e);
+  }
+});
+
 router.get('/me/stats', async (req, res, next) => {
   try {
     const userId = req.user._id;

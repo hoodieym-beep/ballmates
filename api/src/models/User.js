@@ -11,6 +11,7 @@ const userSchema = new mongoose.Schema({
   locale: { type: String, default: 'en' },
   pushToken: { type: String, default: null },
   termsAcceptedAt: { type: Date, default: null },
+  codeOfConductAcceptedAt: { type: Date, default: null },
   createdAt: { type: Date, default: Date.now },
 });
 
