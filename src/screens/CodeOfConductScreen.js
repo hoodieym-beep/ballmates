@@ -1,0 +1,90 @@
+import React, { useState, useEffect } from 'react';
+import { Text, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons } from '@expo/vector-icons';
+import { colors, spacing, typography } from '../constants/theme';
+
+const COC_ACCEPTANCE_KEY = 'codeOfConductAccepted';
+
+export default function CodeOfConductScreen() {
+  const [accepted, setAccepted] = useState(false);
+
+  useEffect(() => {
+    checkAcceptance();
+  }, []);
+
+  const checkAcceptance = async () => {
+    try {
+      const stored = await AsyncStorage.getItem(COC_ACCEPTANCE_KEY);
+      if (stored === 'true') {
+        setAccepted(true);
+      }
+    } catch (e) {
+      console.error('Failed to check CoC acceptance:', e);
+    }
+  };
+
+  const handleAccept = async () => {
+    try {
+      await AsyncStorage.setItem(COC_ACCEPTANCE_KEY, 'true');
+      setAccepted(true);
+    } catch (e) {
+      console.error('Failed to save CoC acceptance:', e);
+    }
+  };
+
+  return (
+    <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <Text style={styles.title}>Code of conduct</Text>
+      <Text style={styles.para}>Ball Mates is for everyone. We expect fair play, respect and safety at all sessions.</Text>
+      <Text style={styles.para}>Do not harass, discriminate or use violence. Respect the organiser and other players. Follow the session rules. Report any concerns so we can keep the community safe and welcoming.</Text>
+
+      <TouchableOpacity
+        style={[styles.button, accepted && styles.buttonAccepted]}
+        onPress={handleAccept}
+        disabled={accepted}
+      >
+        <View style={styles.buttonContent}>
+          {accepted && <Ionicons name="checkmark-circle" size={20} color={colors.success} style={styles.icon} />}
+          <Text style={[styles.buttonText, accepted && styles.buttonTextAccepted]}>
+            {accepted ? 'Code of conduct accepted' : 'Accept code of conduct'}
+          </Text>
+        </View>
+      </TouchableOpacity>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
+  content: { padding: spacing.lg, paddingBottom: spacing.xxl },
+  title: { ...typography.h2, color: colors.text, marginBottom: spacing.lg },
+  para: { ...typography.body, color: colors.textSecondary, lineHeight: 24, marginBottom: spacing.lg },
+  button: {
+    marginTop: spacing.xl,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    backgroundColor: colors.primary,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  buttonAccepted: {
+    backgroundColor: colors.success,
+    opacity: 0.6,
+  },
+  buttonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  icon: {
+    marginRight: spacing.sm,
+  },
+  buttonText: {
+    ...typography.button,
+    color: 'white',
+    textAlign: 'center',
+  },
+  buttonTextAccepted: {
+    color: 'white',
+  },
+});
